@@ -59,8 +59,14 @@ async function loadResults() {
         loading.style.display = 'none';
         container.style.display = 'block';
 
-        // Set title and total
+        // Set title, description, and total
         document.getElementById('survey-title').textContent = survey.title;
+        const descEl = document.getElementById('survey-description');
+        if (survey.description) {
+            descEl.textContent = survey.description;
+        } else {
+            descEl.style.display = 'none';
+        }
         document.getElementById('total-votes').textContent = totalVotes;
         document.getElementById('vote-link').href = `vote.html?id=${surveyId}`;
 
@@ -76,14 +82,15 @@ async function loadResults() {
         sortedImages.forEach((image, index) => {
             const count = voteCounts[image.id] || 0;
             const percentage = totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : 0;
+            const imageLabel = image.title || `Option ${index + 1}`;
 
             const resultItem = document.createElement('div');
             resultItem.className = 'result-item';
             resultItem.innerHTML = `
                 <div style="display: flex; align-items: flex-start; gap: 20px;">
-                    <img src="${image.image_url}" alt="Option ${index + 1}">
+                    <img src="${image.image_url}" alt="${escapeHtml(imageLabel)}">
                     <div style="flex: 1;">
-                        <div style="font-weight: 600; margin-bottom: 5px;">Option ${index + 1}</div>
+                        <div style="font-weight: 600; margin-bottom: 5px;">${escapeHtml(imageLabel)}</div>
                         <div class="result-bar-container">
                             <div class="result-bar" style="width: ${Math.max(percentage, 0)}%;">
                                 ${percentage}%
@@ -120,4 +127,10 @@ function showError(message) {
     const errorContainer = document.getElementById('error-container');
     errorContainer.style.display = 'block';
     errorContainer.innerHTML = `<div class="card message message-error">${message}</div>`;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }

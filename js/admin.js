@@ -1,7 +1,7 @@
 // Admin functionality
 
-// Store accumulated images
-let uploadedImages = [];
+// Store accumulated images with titles
+let uploadedImages = []; // Array of { file, title }
 
 document.addEventListener('DOMContentLoaded', () => {
     const passwordModal = document.getElementById('password-modal');
@@ -46,7 +46,7 @@ function setupImagePreview() {
     imageInput.addEventListener('change', () => {
         const file = imageInput.files[0];
         if (file && file.type.startsWith('image/')) {
-            uploadedImages.push(file);
+            uploadedImages.push({ file, title: '' });
             renderImagePreviews();
         }
         imageInput.value = ''; // Reset input to allow adding same file again
@@ -54,13 +54,22 @@ function setupImagePreview() {
 
     function renderImagePreviews() {
         preview.innerHTML = '';
-        uploadedImages.forEach((file, index) => {
+        uploadedImages.forEach((item, index) => {
             const wrapper = document.createElement('div');
-            wrapper.style.cssText = 'position: relative; display: inline-block;';
+            wrapper.style.cssText = 'position: relative; display: inline-block; vertical-align: top; margin: 5px; text-align: center;';
 
             const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
+            img.src = URL.createObjectURL(item.file);
             img.onload = () => URL.revokeObjectURL(img.src);
+
+            const titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.placeholder = 'Image title';
+            titleInput.value = item.title;
+            titleInput.style.cssText = 'width: 100%; max-width: 150px; margin-top: 5px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85rem;';
+            titleInput.oninput = (e) => {
+                uploadedImages[index].title = e.target.value;
+            };
 
             const removeBtn = document.createElement('button');
             removeBtn.textContent = '×';
@@ -73,6 +82,8 @@ function setupImagePreview() {
 
             wrapper.appendChild(img);
             wrapper.appendChild(removeBtn);
+            wrapper.appendChild(document.createElement('br'));
+            wrapper.appendChild(titleInput);
             preview.appendChild(wrapper);
         });
         imageCount.textContent = `${uploadedImages.length} image${uploadedImages.length !== 1 ? 's' : ''} added`;
@@ -90,6 +101,7 @@ function setupCreateForm() {
         e.preventDefault();
 
         const title = document.getElementById('survey-title').value.trim();
+        const description = document.getElementById('survey-description').value.trim();
 
         if (!title) {
             showMessage('Please enter a survey title.', 'error');
@@ -110,7 +122,7 @@ function setupCreateForm() {
             // Create survey
             const { data: survey, error: surveyError } = await db
                 .from('surveys')
-                .insert({ title })
+                .insert({ title, description })
                 .select()
                 .single();
 
@@ -118,7 +130,9 @@ function setupCreateForm() {
 
             // Upload images and create image records
             for (let i = 0; i < files.length; i++) {
-                const file = files[i];
+                const item = files[i];
+                const file = item.file;
+                const imageTitle = item.title;
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${survey.id}/${Date.now()}-${i}.${fileExt}`;
 
@@ -140,7 +154,8 @@ function setupCreateForm() {
                     .insert({
                         survey_id: survey.id,
                         storage_path: fileName,
-                        image_url: urlData.publicUrl
+                        image_url: urlData.publicUrl,
+                        title: imageTitle || null
                     });
 
                 if (imageError) throw imageError;

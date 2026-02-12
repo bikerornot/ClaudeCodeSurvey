@@ -51,8 +51,14 @@ async function loadSurvey() {
         loading.style.display = 'none';
         container.style.display = 'block';
 
-        // Set title
+        // Set title and description
         document.getElementById('survey-title').textContent = survey.title;
+        const descEl = document.getElementById('survey-description');
+        if (survey.description) {
+            descEl.textContent = survey.description;
+        } else {
+            descEl.style.display = 'none';
+        }
 
         // Render images
         const grid = document.getElementById('image-grid');
@@ -63,7 +69,8 @@ async function loadSurvey() {
             card.className = 'image-card';
             card.dataset.imageId = image.id;
             card.innerHTML = `
-                <img src="${image.image_url}" alt="Survey option">
+                <img src="${image.image_url}" alt="${image.title || 'Survey option'}">
+                ${image.title ? `<div class="image-title">${escapeHtml(image.title)}</div>` : ''}
             `;
             card.addEventListener('click', () => selectImage(image.id, image.image_url));
             grid.appendChild(card);
@@ -169,4 +176,10 @@ function showError(message) {
     const errorContainer = document.getElementById('error-container');
     errorContainer.style.display = 'block';
     errorContainer.innerHTML = `<div class="card message message-error">${message}</div>`;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
