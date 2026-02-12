@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Survey Voting App</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Admin Dashboard</h1>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="admin.html">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Password Modal -->
+    <div id="password-modal" class="modal-overlay">
+        <div class="modal">
+            <h2>Admin Access</h2>
+            <form id="password-form">
+                <div class="form-group">
+                    <label for="password">Enter Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <p id="password-error" class="message message-error" style="display: none; margin-top: 15px;">
+                    Incorrect password. Please try again.
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Content (hidden until authenticated) -->
+    <main id="admin-content" class="container" style="display: none;">
+        <div id="message-container"></div>
+
+        <!-- Create Survey Form -->
+        <div class="card">
+            <h2>Create New Survey</h2>
+            <form id="create-survey-form">
+                <div class="form-group">
+                    <label for="survey-title">Survey Title</label>
+                    <input type="text" id="survey-title" placeholder="Enter survey title" required>
+                </div>
+                <div class="form-group">
+                    <label>Add Images (minimum 2)</label>
+                    <input type="file" id="image-input" accept="image/*">
+                    <div id="upload-preview" class="upload-preview"></div>
+                    <p id="image-count" style="margin-top: 10px; color: #666;">0 images added</p>
+                </div>
+                <button type="submit" class="btn btn-primary" id="create-btn">Create Survey</button>
+            </form>
+        </div>
+
+        <!-- Existing Surveys -->
+        <div class="card">
+            <h2>Existing Surveys</h2>
+            <div id="surveys-loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading surveys...</p>
+            </div>
+            <ul id="surveys-list" class="survey-list" style="display: none;"></ul>
+            <p id="no-surveys" style="display: none; text-align: center; color: #888;">
+                No surveys created yet.
+            </p>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

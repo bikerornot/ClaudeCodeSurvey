@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - Survey Voting App</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Survey Results</h1>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="admin.html">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading results...</p>
+        </div>
+
+        <div id="error-container" style="display: none;"></div>
+
+        <div id="results-container" style="display: none;">
+            <div class="card">
+                <h2 id="survey-title"></h2>
+                <div class="total-votes">
+                    Total Votes: <span id="total-votes">0</span>
+                </div>
+                <button id="refresh-btn" class="btn btn-secondary btn-small">Refresh Results</button>
+            </div>
+
+            <div class="card">
+                <h2>Vote Distribution</h2>
+                <div id="results-list"></div>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <a id="vote-link" href="#" class="btn btn-primary">Vote on this Survey</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/results.js"></script>
+</body>
+</html>

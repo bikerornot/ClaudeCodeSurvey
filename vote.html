@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote - Survey Voting App</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Cast Your Vote</h1>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="admin.html">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading survey...</p>
+        </div>
+
+        <div id="error-container" style="display: none;"></div>
+
+        <div id="survey-container" style="display: none;">
+            <div class="card">
+                <h2 id="survey-title"></h2>
+                <p>Click on an image to vote for it</p>
+            </div>
+
+            <div id="image-grid" class="image-grid"></div>
+
+            <div id="vote-actions" class="card" style="display: none; text-align: center;">
+                <p>Selected image:</p>
+                <img id="selected-preview" style="max-width: 200px; border-radius: 10px; margin: 15px 0;">
+                <br>
+                <button id="submit-vote" class="btn btn-success">Submit Vote</button>
+                <button id="cancel-vote" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+
+        <div id="already-voted" class="card already-voted" style="display: none;">
+            <h2>You've Already Voted!</h2>
+            <p>You have already cast your vote for this survey.</p>
+            <a id="view-results-link" href="#" class="btn btn-primary">View Results</a>
+        </div>
+
+        <div id="thank-you" class="card already-voted" style="display: none;">
+            <h2>Thank You for Voting!</h2>
+            <p>Your vote has been recorded.</p>
+            <a id="results-link" href="#" class="btn btn-primary">View Results</a>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/vote.js"></script>
+</body>
+</html>
