@@ -86,16 +86,13 @@ function initializeCBChoices() {
 }
 
 function addMCChoice() {
-    mcChoiceCount++;
     const container = document.getElementById('mc-choices-container');
     const wrapper = document.createElement('div');
     wrapper.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
-    wrapper.dataset.choiceId = mcChoiceCount;
 
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'mc-choice-input';
-    input.placeholder = `Choice ${mcChoiceCount}`;
     input.style.cssText = 'flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 5px;';
 
     const removeBtn = document.createElement('button');
@@ -106,6 +103,7 @@ function addMCChoice() {
     removeBtn.onclick = () => {
         if (document.querySelectorAll('.mc-choice-input').length > 2) {
             wrapper.remove();
+            renumberMCChoices();
         } else {
             alert('You must have at least 2 choices.');
         }
@@ -114,19 +112,24 @@ function addMCChoice() {
     wrapper.appendChild(input);
     wrapper.appendChild(removeBtn);
     container.appendChild(wrapper);
+    renumberMCChoices();
+}
+
+function renumberMCChoices() {
+    const inputs = document.querySelectorAll('.mc-choice-input');
+    inputs.forEach((input, index) => {
+        input.placeholder = `Choice ${index + 1}`;
+    });
 }
 
 function addCBChoice() {
-    cbChoiceCount++;
     const container = document.getElementById('cb-choices-container');
     const wrapper = document.createElement('div');
     wrapper.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
-    wrapper.dataset.choiceId = cbChoiceCount;
 
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'cb-choice-input';
-    input.placeholder = `Option ${cbChoiceCount}`;
     input.style.cssText = 'flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 5px;';
 
     const removeBtn = document.createElement('button');
@@ -137,6 +140,7 @@ function addCBChoice() {
     removeBtn.onclick = () => {
         if (document.querySelectorAll('.cb-choice-input').length > 2) {
             wrapper.remove();
+            renumberCBChoices();
         } else {
             alert('You must have at least 2 options.');
         }
@@ -145,6 +149,14 @@ function addCBChoice() {
     wrapper.appendChild(input);
     wrapper.appendChild(removeBtn);
     container.appendChild(wrapper);
+    renumberCBChoices();
+}
+
+function renumberCBChoices() {
+    const inputs = document.querySelectorAll('.cb-choice-input');
+    inputs.forEach((input, index) => {
+        input.placeholder = `Option ${index + 1}`;
+    });
 }
 
 function setupImagePreview() {
