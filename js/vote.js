@@ -168,7 +168,6 @@ function showAlreadyVoted() {
 function showThankYou() {
     document.getElementById('survey-container').style.display = 'none';
     document.getElementById('thank-you').style.display = 'block';
-    document.getElementById('results-link').href = `results.html?id=${surveyId}`;
 }
 
 function showError(message) {
