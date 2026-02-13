@@ -1,6 +1,7 @@
 // Voting functionality
 
 let selectedImageId = null;
+let selectedImageIds = []; // For checkbox surveys
 let surveyId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -60,9 +61,9 @@ async function loadSurvey() {
             descEl.style.display = 'none';
         }
 
-        // Set question for multiple choice surveys
+        // Set question for multiple choice and checkbox surveys
         const questionEl = document.getElementById('survey-question');
-        if (survey.type === 'multiple_choice' && survey.question) {
+        if ((survey.type === 'multiple_choice' || survey.type === 'checkbox') && survey.question) {
             questionEl.textContent = survey.question;
             questionEl.style.display = 'block';
         } else {
@@ -73,11 +74,13 @@ async function loadSurvey() {
         const instructionEl = document.getElementById('survey-instruction');
         if (survey.type === 'multiple_choice') {
             instructionEl.textContent = 'Select your answer:';
+        } else if (survey.type === 'checkbox') {
+            instructionEl.textContent = 'Select all that apply:';
         } else {
             instructionEl.textContent = 'Click on an image to vote for it';
         }
 
-        // Render images or multiple choice
+        // Render images, multiple choice, or checkboxes
         const grid = document.getElementById('image-grid');
         grid.innerHTML = '';
 
@@ -91,6 +94,26 @@ async function loadSurvey() {
                 button.textContent = choice.title;
                 button.addEventListener('click', () => selectChoice(choice.id, choice.title));
                 grid.appendChild(button);
+            });
+        } else if (survey.type === 'checkbox') {
+            // Render as checkboxes
+            grid.className = 'checkbox-grid';
+            images.forEach(option => {
+                const label = document.createElement('label');
+                label.className = 'checkbox-label';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'checkbox-input';
+                checkbox.dataset.imageId = option.id;
+                checkbox.addEventListener('change', () => updateCheckboxSelection());
+
+                const span = document.createElement('span');
+                span.textContent = option.title;
+
+                label.appendChild(checkbox);
+                label.appendChild(span);
+                grid.appendChild(label);
             });
         } else {
             // Render as image grid
@@ -157,6 +180,22 @@ function selectChoice(choiceId, choiceText) {
     actions.style.display = 'block';
 }
 
+function updateCheckboxSelection() {
+    const checkboxes = document.querySelectorAll('.checkbox-input:checked');
+    selectedImageIds = Array.from(checkboxes).map(cb => cb.dataset.imageId);
+
+    const actions = document.getElementById('vote-actions');
+    const preview = document.getElementById('selected-preview');
+    preview.style.display = 'none';
+
+    if (selectedImageIds.length > 0) {
+        document.querySelector('#vote-actions p').textContent = `Selected ${selectedImageIds.length} option${selectedImageIds.length !== 1 ? 's' : ''}`;
+        actions.style.display = 'block';
+    } else {
+        actions.style.display = 'none';
+    }
+}
+
 function setupVoteActions() {
     const submitBtn = document.getElementById('submit-vote');
     const cancelBtn = document.getElementById('cancel-vote');
@@ -166,21 +205,43 @@ function setupVoteActions() {
 }
 
 async function submitVote() {
-    if (!selectedImageId) return;
-
     const submitBtn = document.getElementById('submit-vote');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
 
     try {
-        const { error } = await db
-            .from('votes')
-            .insert({
-                survey_id: surveyId,
-                image_id: selectedImageId
-            });
+        // Check if this is a checkbox survey (multiple selections)
+        const checkboxInputs = document.querySelectorAll('.checkbox-input');
 
-        if (error) throw error;
+        if (checkboxInputs.length > 0) {
+            // Checkbox survey - submit multiple votes
+            if (selectedImageIds.length === 0) {
+                throw new Error('Please select at least one option');
+            }
+
+            for (const imageId of selectedImageIds) {
+                const { error } = await db
+                    .from('votes')
+                    .insert({
+                        survey_id: surveyId,
+                        image_id: imageId
+                    });
+
+                if (error) throw error;
+            }
+        } else {
+            // Single choice survey
+            if (!selectedImageId) return;
+
+            const { error } = await db
+                .from('votes')
+                .insert({
+                    survey_id: surveyId,
+                    image_id: selectedImageId
+                });
+
+            if (error) throw error;
+        }
 
         // Save to localStorage
         saveVote(surveyId);
@@ -197,8 +258,12 @@ async function submitVote() {
 
 function cancelSelection() {
     selectedImageId = null;
+    selectedImageIds = [];
     document.querySelectorAll('.image-card, .choice-button').forEach(el => {
         el.classList.remove('selected');
+    });
+    document.querySelectorAll('.checkbox-input').forEach(cb => {
+        cb.checked = false;
     });
     document.getElementById('vote-actions').style.display = 'none';
     document.querySelector('#vote-actions p').textContent = 'Selected image:';

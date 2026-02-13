@@ -43,16 +43,108 @@ function setupSurveyTypeToggle() {
     const typeSelect = document.getElementById('survey-type');
     const imageFields = document.getElementById('image-fields');
     const mcFields = document.getElementById('multiple-choice-fields');
+    const cbFields = document.getElementById('checkbox-fields');
+
+    // Initialize with 4 choices
+    initializeMCChoices();
+    initializeCBChoices();
 
     typeSelect.addEventListener('change', () => {
+        imageFields.style.display = 'none';
+        mcFields.style.display = 'none';
+        cbFields.style.display = 'none';
+
         if (typeSelect.value === 'image') {
             imageFields.style.display = 'block';
-            mcFields.style.display = 'none';
-        } else {
-            imageFields.style.display = 'none';
+        } else if (typeSelect.value === 'multiple_choice') {
             mcFields.style.display = 'block';
+        } else if (typeSelect.value === 'checkbox') {
+            cbFields.style.display = 'block';
         }
     });
+}
+
+let mcChoiceCount = 0;
+let cbChoiceCount = 0;
+
+function initializeMCChoices() {
+    const container = document.getElementById('mc-choices-container');
+    container.innerHTML = '';
+    mcChoiceCount = 0;
+    for (let i = 0; i < 4; i++) {
+        addMCChoice();
+    }
+}
+
+function initializeCBChoices() {
+    const container = document.getElementById('cb-choices-container');
+    container.innerHTML = '';
+    cbChoiceCount = 0;
+    for (let i = 0; i < 4; i++) {
+        addCBChoice();
+    }
+}
+
+function addMCChoice() {
+    mcChoiceCount++;
+    const container = document.getElementById('mc-choices-container');
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
+    wrapper.dataset.choiceId = mcChoiceCount;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'mc-choice-input';
+    input.placeholder = `Choice ${mcChoiceCount}`;
+    input.style.cssText = 'flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 5px;';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = '×';
+    removeBtn.className = 'btn btn-secondary btn-small';
+    removeBtn.style.cssText = 'min-width: 40px;';
+    removeBtn.onclick = () => {
+        if (document.querySelectorAll('.mc-choice-input').length > 2) {
+            wrapper.remove();
+        } else {
+            alert('You must have at least 2 choices.');
+        }
+    };
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(removeBtn);
+    container.appendChild(wrapper);
+}
+
+function addCBChoice() {
+    cbChoiceCount++;
+    const container = document.getElementById('cb-choices-container');
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
+    wrapper.dataset.choiceId = cbChoiceCount;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'cb-choice-input';
+    input.placeholder = `Option ${cbChoiceCount}`;
+    input.style.cssText = 'flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 5px;';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = '×';
+    removeBtn.className = 'btn btn-secondary btn-small';
+    removeBtn.style.cssText = 'min-width: 40px;';
+    removeBtn.onclick = () => {
+        if (document.querySelectorAll('.cb-choice-input').length > 2) {
+            wrapper.remove();
+        } else {
+            alert('You must have at least 2 options.');
+        }
+    };
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(removeBtn);
+    container.appendChild(wrapper);
 }
 
 function setupImagePreview() {
@@ -132,14 +224,18 @@ function setupCreateForm() {
         try {
             if (surveyType === 'image') {
                 await createImageSurvey(title, description);
-            } else {
+            } else if (surveyType === 'multiple_choice') {
                 await createMultipleChoiceSurvey(title, description);
+            } else if (surveyType === 'checkbox') {
+                await createCheckboxSurvey(title, description);
             }
 
             showMessage('Survey created successfully!', 'success');
             form.reset();
             uploadedImages = [];
             window.renderImagePreviews();
+            initializeMCChoices();
+            initializeCBChoices();
             loadSurveys();
 
         } catch (err) {
@@ -201,12 +297,8 @@ async function createImageSurvey(title, description) {
 
 async function createMultipleChoiceSurvey(title, description) {
     const question = document.getElementById('mc-question').value.trim();
-    const choices = [
-        document.getElementById('mc-choice-1').value.trim(),
-        document.getElementById('mc-choice-2').value.trim(),
-        document.getElementById('mc-choice-3').value.trim(),
-        document.getElementById('mc-choice-4').value.trim()
-    ].filter(c => c); // Remove empty choices
+    const choiceInputs = document.querySelectorAll('.mc-choice-input');
+    const choices = Array.from(choiceInputs).map(input => input.value.trim()).filter(c => c);
 
     if (!question) {
         throw new Error('Please enter a question.');
@@ -239,6 +331,49 @@ async function createMultipleChoiceSurvey(title, description) {
                 survey_id: survey.id,
                 storage_path: '', // Empty for multiple choice
                 image_url: '', // Empty for multiple choice
+                title: choices[i]
+            });
+
+        if (choiceError) throw choiceError;
+    }
+}
+
+async function createCheckboxSurvey(title, description) {
+    const question = document.getElementById('cb-question').value.trim();
+    const choiceInputs = document.querySelectorAll('.cb-choice-input');
+    const choices = Array.from(choiceInputs).map(input => input.value.trim()).filter(c => c);
+
+    if (!question) {
+        throw new Error('Please enter a question.');
+    }
+
+    if (choices.length < 2) {
+        throw new Error('Please enter at least 2 options.');
+    }
+
+    const surveyTitle = title || 'Checkbox Survey';
+
+    const { data: survey, error: surveyError } = await db
+        .from('surveys')
+        .insert({
+            title: surveyTitle,
+            description: description || null,
+            question: question,
+            type: 'checkbox'
+        })
+        .select()
+        .single();
+
+    if (surveyError) throw surveyError;
+
+    // Create "image" records for each option (reusing images table)
+    for (let i = 0; i < choices.length; i++) {
+        const { error: choiceError } = await db
+            .from('images')
+            .insert({
+                survey_id: survey.id,
+                storage_path: '', // Empty for checkbox
+                image_url: '', // Empty for checkbox
                 title: choices[i]
             });
 
@@ -285,7 +420,9 @@ async function loadSurveys() {
 
             const voteLink = `${window.location.origin}${window.location.pathname.replace('admin.html', '')}vote.html?id=${survey.id}`;
 
-            const surveyTypeLabel = survey.type === 'multiple_choice' ? 'Multiple Choice' : 'Image';
+            let surveyTypeLabel = 'Image';
+            if (survey.type === 'multiple_choice') surveyTypeLabel = 'Multiple Choice';
+            if (survey.type === 'checkbox') surveyTypeLabel = 'Checkbox';
             li.innerHTML = `
                 <div>
                     <h3>${escapeHtml(survey.title)} <span style="font-size: 0.8rem; color: #888; font-weight: normal;">(${surveyTypeLabel})</span></h3>

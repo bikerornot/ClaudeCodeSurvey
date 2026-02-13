@@ -96,8 +96,8 @@ async function loadResults() {
             const resultItem = document.createElement('div');
             resultItem.className = 'result-item';
 
-            if (survey.type === 'multiple_choice') {
-                // Multiple choice result (no image)
+            if (survey.type === 'multiple_choice' || survey.type === 'checkbox') {
+                // Multiple choice or checkbox result (no image)
                 resultItem.innerHTML = `
                     <div style="padding: 15px;">
                         <div style="font-weight: 600; margin-bottom: 10px; font-size: 1.1rem;">${escapeHtml(imageLabel)}</div>
