@@ -43,6 +43,13 @@
             <h2>Create New Survey</h2>
             <form id="create-survey-form">
                 <div class="form-group">
+                    <label for="survey-type">Survey Type</label>
+                    <select id="survey-type" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+                        <option value="image">Image Survey</option>
+                        <option value="multiple_choice">Multiple Choice</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="survey-title">Survey Title</label>
                     <input type="text" id="survey-title" placeholder="Enter survey title" required>
                 </div>
@@ -50,12 +57,32 @@
                     <label for="survey-description">Description</label>
                     <textarea id="survey-description" placeholder="Tell voters what they're choosing between..." rows="3" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem; font-family: inherit; resize: vertical;"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Add Images (minimum 2)</label>
-                    <input type="file" id="image-input" accept="image/*">
-                    <div id="upload-preview" class="upload-preview"></div>
-                    <p id="image-count" style="margin-top: 10px; color: #666;">0 images added</p>
+
+                <!-- Image Survey Fields -->
+                <div id="image-fields">
+                    <div class="form-group">
+                        <label>Add Images (minimum 2)</label>
+                        <input type="file" id="image-input" accept="image/*">
+                        <div id="upload-preview" class="upload-preview"></div>
+                        <p id="image-count" style="margin-top: 10px; color: #666;">0 images added</p>
+                    </div>
                 </div>
+
+                <!-- Multiple Choice Fields -->
+                <div id="multiple-choice-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="mc-question">Question</label>
+                        <input type="text" id="mc-question" placeholder="Enter your question">
+                    </div>
+                    <div class="form-group">
+                        <label>Answer Choices</label>
+                        <input type="text" id="mc-choice-1" placeholder="Choice 1" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                        <input type="text" id="mc-choice-2" placeholder="Choice 2" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                        <input type="text" id="mc-choice-3" placeholder="Choice 3" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                        <input type="text" id="mc-choice-4" placeholder="Choice 4" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-primary" id="create-btn">Create Survey</button>
             </form>
         </div>

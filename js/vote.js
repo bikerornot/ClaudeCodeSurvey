@@ -60,21 +60,53 @@ async function loadSurvey() {
             descEl.style.display = 'none';
         }
 
-        // Render images
+        // Set question for multiple choice surveys
+        const questionEl = document.getElementById('survey-question');
+        if (survey.type === 'multiple_choice' && survey.question) {
+            questionEl.textContent = survey.question;
+            questionEl.style.display = 'block';
+        } else {
+            questionEl.style.display = 'none';
+        }
+
+        // Set instruction text based on survey type
+        const instructionEl = document.getElementById('survey-instruction');
+        if (survey.type === 'multiple_choice') {
+            instructionEl.textContent = 'Select your answer:';
+        } else {
+            instructionEl.textContent = 'Click on an image to vote for it';
+        }
+
+        // Render images or multiple choice
         const grid = document.getElementById('image-grid');
         grid.innerHTML = '';
 
-        images.forEach(image => {
-            const card = document.createElement('div');
-            card.className = 'image-card';
-            card.dataset.imageId = image.id;
-            card.innerHTML = `
-                <img src="${image.image_url}" alt="${image.title || 'Survey option'}">
-                ${image.title ? `<div class="image-title">${escapeHtml(image.title)}</div>` : ''}
-            `;
-            card.addEventListener('click', () => selectImage(image.id, image.image_url));
-            grid.appendChild(card);
-        });
+        if (survey.type === 'multiple_choice') {
+            // Render as multiple choice buttons
+            grid.className = 'multiple-choice-grid';
+            images.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'choice-button';
+                button.dataset.imageId = choice.id;
+                button.textContent = choice.title;
+                button.addEventListener('click', () => selectChoice(choice.id, choice.title));
+                grid.appendChild(button);
+            });
+        } else {
+            // Render as image grid
+            grid.className = 'image-grid';
+            images.forEach(image => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                card.dataset.imageId = image.id;
+                card.innerHTML = `
+                    <img src="${image.image_url}" alt="${image.title || 'Survey option'}">
+                    ${image.title ? `<div class="image-title">${escapeHtml(image.title)}</div>` : ''}
+                `;
+                card.addEventListener('click', () => selectImage(image.id, image.image_url));
+                grid.appendChild(card);
+            });
+        }
 
     } catch (err) {
         showError(`Error loading survey: ${err.message}`);
@@ -99,6 +131,29 @@ function selectImage(imageId, imageUrl) {
     const actions = document.getElementById('vote-actions');
     const preview = document.getElementById('selected-preview');
     preview.src = imageUrl;
+    preview.style.display = 'block';
+    actions.style.display = 'block';
+}
+
+function selectChoice(choiceId, choiceText) {
+    // Remove previous selection
+    document.querySelectorAll('.choice-button').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+
+    // Select new choice
+    const selectedBtn = document.querySelector(`.choice-button[data-image-id="${choiceId}"]`);
+    if (selectedBtn) {
+        selectedBtn.classList.add('selected');
+    }
+
+    selectedImageId = choiceId;
+
+    // Show vote actions (hide preview for multiple choice)
+    const actions = document.getElementById('vote-actions');
+    const preview = document.getElementById('selected-preview');
+    preview.style.display = 'none';
+    document.querySelector('#vote-actions p').textContent = `Selected: ${choiceText}`;
     actions.style.display = 'block';
 }
 
@@ -142,10 +197,11 @@ async function submitVote() {
 
 function cancelSelection() {
     selectedImageId = null;
-    document.querySelectorAll('.image-card').forEach(card => {
-        card.classList.remove('selected');
+    document.querySelectorAll('.image-card, .choice-button').forEach(el => {
+        el.classList.remove('selected');
     });
     document.getElementById('vote-actions').style.display = 'none';
+    document.querySelector('#vote-actions p').textContent = 'Selected image:';
 }
 
 function hasVoted(surveyId) {

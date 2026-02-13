@@ -59,7 +59,7 @@ async function loadResults() {
         loading.style.display = 'none';
         container.style.display = 'block';
 
-        // Set title, description, and total
+        // Set title, description, question, and total
         document.getElementById('survey-title').textContent = survey.title;
         const descEl = document.getElementById('survey-description');
         if (survey.description) {
@@ -67,6 +67,16 @@ async function loadResults() {
         } else {
             descEl.style.display = 'none';
         }
+
+        // Set question for multiple choice surveys
+        const questionEl = document.getElementById('survey-question');
+        if (survey.type === 'multiple_choice' && survey.question) {
+            questionEl.textContent = survey.question;
+            questionEl.style.display = 'block';
+        } else {
+            questionEl.style.display = 'none';
+        }
+
         document.getElementById('total-votes').textContent = totalVotes;
 
         // Render results
@@ -85,11 +95,12 @@ async function loadResults() {
 
             const resultItem = document.createElement('div');
             resultItem.className = 'result-item';
-            resultItem.innerHTML = `
-                <div style="display: flex; align-items: flex-start; gap: 20px;">
-                    <img src="${image.image_url}" alt="${escapeHtml(imageLabel)}">
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; margin-bottom: 5px;">${escapeHtml(imageLabel)}</div>
+
+            if (survey.type === 'multiple_choice') {
+                // Multiple choice result (no image)
+                resultItem.innerHTML = `
+                    <div style="padding: 15px;">
+                        <div style="font-weight: 600; margin-bottom: 10px; font-size: 1.1rem;">${escapeHtml(imageLabel)}</div>
                         <div class="result-bar-container">
                             <div class="result-bar" style="width: ${Math.max(percentage, 0)}%;">
                                 ${percentage}%
@@ -100,8 +111,27 @@ async function loadResults() {
                             <span>${percentage}%</span>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                // Image survey result
+                resultItem.innerHTML = `
+                    <div style="display: flex; align-items: flex-start; gap: 20px;">
+                        <img src="${image.image_url}" alt="${escapeHtml(imageLabel)}">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 5px;">${escapeHtml(imageLabel)}</div>
+                            <div class="result-bar-container">
+                                <div class="result-bar" style="width: ${Math.max(percentage, 0)}%;">
+                                    ${percentage}%
+                                </div>
+                            </div>
+                            <div class="result-stats">
+                                <span>${count} vote${count !== 1 ? 's' : ''}</span>
+                                <span>${percentage}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
             resultsList.appendChild(resultItem);
         });
 

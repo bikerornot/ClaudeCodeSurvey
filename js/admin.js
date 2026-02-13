@@ -36,6 +36,23 @@ function initAdmin() {
     loadSurveys();
     setupCreateForm();
     setupImagePreview();
+    setupSurveyTypeToggle();
+}
+
+function setupSurveyTypeToggle() {
+    const typeSelect = document.getElementById('survey-type');
+    const imageFields = document.getElementById('image-fields');
+    const mcFields = document.getElementById('multiple-choice-fields');
+
+    typeSelect.addEventListener('change', () => {
+        if (typeSelect.value === 'image') {
+            imageFields.style.display = 'block';
+            mcFields.style.display = 'none';
+        } else {
+            imageFields.style.display = 'none';
+            mcFields.style.display = 'block';
+        }
+    });
 }
 
 function setupImagePreview() {
@@ -100,6 +117,7 @@ function setupCreateForm() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const surveyType = document.getElementById('survey-type').value;
         const title = document.getElementById('survey-title').value.trim();
         const description = document.getElementById('survey-description').value.trim();
 
@@ -108,57 +126,14 @@ function setupCreateForm() {
             return;
         }
 
-        if (uploadedImages.length < 2) {
-            showMessage('Please add at least 2 images.', 'error');
-            return;
-        }
-
-        const files = uploadedImages;
-
         createBtn.disabled = true;
         createBtn.textContent = 'Creating...';
 
         try {
-            // Create survey
-            const { data: survey, error: surveyError } = await db
-                .from('surveys')
-                .insert({ title, description })
-                .select()
-                .single();
-
-            if (surveyError) throw surveyError;
-
-            // Upload images and create image records
-            for (let i = 0; i < files.length; i++) {
-                const item = files[i];
-                const file = item.file;
-                const imageTitle = item.title;
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${survey.id}/${Date.now()}-${i}.${fileExt}`;
-
-                // Upload to storage
-                const { data: uploadData, error: uploadError } = await db.storage
-                    .from('survey-images')
-                    .upload(fileName, file);
-
-                if (uploadError) throw uploadError;
-
-                // Get public URL
-                const { data: urlData } = db.storage
-                    .from('survey-images')
-                    .getPublicUrl(fileName);
-
-                // Create image record
-                const { error: imageError } = await db
-                    .from('images')
-                    .insert({
-                        survey_id: survey.id,
-                        storage_path: fileName,
-                        image_url: urlData.publicUrl,
-                        title: imageTitle || null
-                    });
-
-                if (imageError) throw imageError;
+            if (surveyType === 'image') {
+                await createImageSurvey(title, description);
+            } else {
+                await createMultipleChoiceSurvey(title, description);
             }
 
             showMessage('Survey created successfully!', 'success');
@@ -174,6 +149,101 @@ function setupCreateForm() {
             createBtn.textContent = 'Create Survey';
         }
     });
+}
+
+async function createImageSurvey(title, description) {
+    if (uploadedImages.length < 2) {
+        throw new Error('Please add at least 2 images.');
+    }
+
+    // Create survey
+    const { data: survey, error: surveyError } = await db
+        .from('surveys')
+        .insert({ title, description, type: 'image' })
+        .select()
+        .single();
+
+    if (surveyError) throw surveyError;
+
+    // Upload images and create image records
+    for (let i = 0; i < uploadedImages.length; i++) {
+        const item = uploadedImages[i];
+        const file = item.file;
+        const imageTitle = item.title;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${survey.id}/${Date.now()}-${i}.${fileExt}`;
+
+        // Upload to storage
+        const { error: uploadError } = await db.storage
+            .from('survey-images')
+            .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: urlData } = db.storage
+            .from('survey-images')
+            .getPublicUrl(fileName);
+
+        // Create image record
+        const { error: imageError } = await db
+            .from('images')
+            .insert({
+                survey_id: survey.id,
+                storage_path: fileName,
+                image_url: urlData.publicUrl,
+                title: imageTitle || null
+            });
+
+        if (imageError) throw imageError;
+    }
+}
+
+async function createMultipleChoiceSurvey(title, description) {
+    const question = document.getElementById('mc-question').value.trim();
+    const choices = [
+        document.getElementById('mc-choice-1').value.trim(),
+        document.getElementById('mc-choice-2').value.trim(),
+        document.getElementById('mc-choice-3').value.trim(),
+        document.getElementById('mc-choice-4').value.trim()
+    ].filter(c => c); // Remove empty choices
+
+    if (!question) {
+        throw new Error('Please enter a question.');
+    }
+
+    if (choices.length < 2) {
+        throw new Error('Please enter at least 2 answer choices.');
+    }
+
+    const surveyTitle = title || 'Multiple Choice Survey';
+
+    const { data: survey, error: surveyError } = await db
+        .from('surveys')
+        .insert({
+            title: surveyTitle,
+            description: description || null,
+            question: question,
+            type: 'multiple_choice'
+        })
+        .select()
+        .single();
+
+    if (surveyError) throw surveyError;
+
+    // Create "image" records for each choice (reusing images table)
+    for (let i = 0; i < choices.length; i++) {
+        const { error: choiceError } = await db
+            .from('images')
+            .insert({
+                survey_id: survey.id,
+                storage_path: '', // Empty for multiple choice
+                image_url: '', // Empty for multiple choice
+                title: choices[i]
+            });
+
+        if (choiceError) throw choiceError;
+    }
 }
 
 async function loadSurveys() {
@@ -215,9 +285,10 @@ async function loadSurveys() {
 
             const voteLink = `${window.location.origin}${window.location.pathname.replace('admin.html', '')}vote.html?id=${survey.id}`;
 
+            const surveyTypeLabel = survey.type === 'multiple_choice' ? 'Multiple Choice' : 'Image';
             li.innerHTML = `
                 <div>
-                    <h3>${escapeHtml(survey.title)}</h3>
+                    <h3>${escapeHtml(survey.title)} <span style="font-size: 0.8rem; color: #888; font-weight: normal;">(${surveyTypeLabel})</span></h3>
                     <span class="date">Created: ${new Date(survey.created_at).toLocaleDateString()} | Votes: ${count || 0}</span>
                 </div>
                 <div class="actions">
