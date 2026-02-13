@@ -68,7 +68,6 @@ async function loadResults() {
             descEl.style.display = 'none';
         }
         document.getElementById('total-votes').textContent = totalVotes;
-        document.getElementById('vote-link').href = `vote.html?id=${surveyId}`;
 
         // Render results
         const resultsList = document.getElementById('results-list');
