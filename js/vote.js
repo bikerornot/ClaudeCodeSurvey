@@ -52,22 +52,12 @@ async function loadSurvey() {
         loading.style.display = 'none';
         container.style.display = 'block';
 
-        // Set title and description
-        document.getElementById('survey-title').textContent = survey.title;
-        const descEl = document.getElementById('survey-description');
-        if (survey.description) {
-            descEl.textContent = survey.description;
-        } else {
-            descEl.style.display = 'none';
-        }
-
-        // Set question for multiple choice and checkbox surveys
+        // Set question (use question field for MC/checkbox, title for image surveys)
         const questionEl = document.getElementById('survey-question');
-        if ((survey.type === 'multiple_choice' || survey.type === 'checkbox') && survey.question) {
-            questionEl.textContent = survey.question;
-            questionEl.style.display = 'block';
+        if (survey.type === 'multiple_choice' || survey.type === 'checkbox') {
+            questionEl.textContent = survey.question || survey.title;
         } else {
-            questionEl.style.display = 'none';
+            questionEl.textContent = survey.title;
         }
 
         // Set instruction text based on survey type

@@ -33,10 +33,25 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initAdmin() {
-    loadSurveys();
     setupCreateForm();
     setupImagePreview();
     setupSurveyTypeToggle();
+    setupCopyButton();
+}
+
+function setupCopyButton() {
+    document.getElementById('copy-link-btn').addEventListener('click', () => {
+        const linkInput = document.getElementById('survey-link-input');
+        linkInput.select();
+        navigator.clipboard.writeText(linkInput.value).then(() => {
+            const btn = document.getElementById('copy-link-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        });
+    });
 }
 
 function setupSurveyTypeToggle() {
@@ -234,21 +249,25 @@ function setupCreateForm() {
         createBtn.textContent = 'Creating...';
 
         try {
+            let surveyId;
             if (surveyType === 'image') {
-                await createImageSurvey(title, description);
+                surveyId = await createImageSurvey(title, description);
             } else if (surveyType === 'multiple_choice') {
-                await createMultipleChoiceSurvey(title, description);
+                surveyId = await createMultipleChoiceSurvey(title, description);
             } else if (surveyType === 'checkbox') {
-                await createCheckboxSurvey(title, description);
+                surveyId = await createCheckboxSurvey(title, description);
             }
 
-            showMessage('Survey created successfully!', 'success');
+            // Show survey link
+            const voteLink = `${window.location.origin}${window.location.pathname.replace('admin.html', '')}vote.html?id=${surveyId}`;
+            document.getElementById('survey-link-input').value = voteLink;
+            document.getElementById('survey-created-box').style.display = 'block';
+
             form.reset();
             uploadedImages = [];
             window.renderImagePreviews();
             initializeMCChoices();
             initializeCBChoices();
-            loadSurveys();
 
         } catch (err) {
             showMessage(`Error creating survey: ${err.message}`, 'error');
@@ -272,6 +291,8 @@ async function createImageSurvey(title, description) {
         .single();
 
     if (surveyError) throw surveyError;
+
+    const surveyId = survey.id;
 
     // Upload images and create image records
     for (let i = 0; i < uploadedImages.length; i++) {
@@ -305,6 +326,8 @@ async function createImageSurvey(title, description) {
 
         if (imageError) throw imageError;
     }
+
+    return surveyId;
 }
 
 async function createMultipleChoiceSurvey(title, description) {
@@ -348,6 +371,8 @@ async function createMultipleChoiceSurvey(title, description) {
 
         if (choiceError) throw choiceError;
     }
+
+    return survey.id;
 }
 
 async function createCheckboxSurvey(title, description) {
@@ -391,6 +416,8 @@ async function createCheckboxSurvey(title, description) {
 
         if (choiceError) throw choiceError;
     }
+
+    return survey.id;
 }
 
 async function loadSurveys() {

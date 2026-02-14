@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey List - Survey Voting App</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Survey List</h1>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="admin.html">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Password Modal -->
+    <div id="password-modal" class="modal-overlay">
+        <div class="modal">
+            <h2>Admin Access</h2>
+            <form id="password-form">
+                <div class="form-group">
+                    <label for="password">Enter Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <p id="password-error" class="message message-error" style="display: none; margin-top: 15px;">
+                    Incorrect password. Please try again.
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Embed Code Modal -->
+    <div id="embed-modal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <h2>Embed Code</h2>
+            <p style="margin-bottom: 15px;">Copy this code and paste it into your website or blog:</p>
+            <textarea id="embed-code" readonly rows="4" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-family: monospace; font-size: 0.9rem; margin-bottom: 15px;"></textarea>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-primary" onclick="copyEmbedCode()">Copy Code</button>
+                <button class="btn btn-secondary" onclick="closeEmbedModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Survey List Content (hidden until authenticated) -->
+    <main id="surveys-content" class="container" style="display: none;">
+        <!-- Admin Navigation -->
+        <div class="card" style="text-align: center;">
+            <a href="admin.html" class="btn btn-secondary" style="margin-right: 10px;">Create Surveys</a>
+            <a href="surveys.html" class="btn btn-primary">View Surveys</a>
+        </div>
+
+        <div class="card">
+            <h2>All Surveys</h2>
+            <div id="surveys-loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading surveys...</p>
+            </div>
+            <ul id="surveys-list" class="survey-list" style="display: none;"></ul>
+            <p id="no-surveys" style="display: none; text-align: center; color: #888;">
+                No surveys created yet.
+            </p>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordModal = document.getElementById('password-modal');
+            const passwordForm = document.getElementById('password-form');
+            const passwordInput = document.getElementById('password');
+            const passwordError = document.getElementById('password-error');
+            const surveysContent = document.getElementById('surveys-content');
+
+            // Check if already authenticated
+            if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+                passwordModal.style.display = 'none';
+                surveysContent.style.display = 'block';
+                loadSurveys();
+            }
+
+            // Password form submission
+            passwordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (passwordInput.value === ADMIN_PASSWORD) {
+                    sessionStorage.setItem('adminAuthenticated', 'true');
+                    passwordModal.style.display = 'none';
+                    surveysContent.style.display = 'block';
+                    loadSurveys();
+                } else {
+                    passwordError.style.display = 'block';
+                    passwordInput.value = '';
+                }
+            });
+        });
+
+        async function loadSurveys() {
+            const loading = document.getElementById('surveys-loading');
+            const list = document.getElementById('surveys-list');
+            const noSurveys = document.getElementById('no-surveys');
+
+            loading.style.display = 'block';
+            list.style.display = 'none';
+            noSurveys.style.display = 'none';
+
+            try {
+                const { data: surveys, error } = await db
+                    .from('surveys')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                loading.style.display = 'none';
+
+                if (error) throw error;
+
+                if (!surveys || surveys.length === 0) {
+                    noSurveys.style.display = 'block';
+                    return;
+                }
+
+                list.innerHTML = '';
+                list.style.display = 'block';
+
+                for (const survey of surveys) {
+                    // Get vote count for this survey
+                    const { count } = await db
+                        .from('votes')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('survey_id', survey.id);
+
+                    const li = document.createElement('li');
+                    li.className = 'survey-item';
+
+                    let surveyTypeLabel = 'Image';
+                    if (survey.type === 'multiple_choice') surveyTypeLabel = 'Multiple Choice';
+                    if (survey.type === 'checkbox') surveyTypeLabel = 'Checkbox';
+
+                    const voteLink = `${window.location.origin}${window.location.pathname.replace('surveys.html', '')}vote.html?id=${survey.id}`;
+
+                    li.innerHTML = `
+                        <div>
+                            <h3>${escapeHtml(survey.title)} <span style="font-size: 0.8rem; color: #888; font-weight: normal;">(${surveyTypeLabel})</span></h3>
+                            <span class="date">Created: ${new Date(survey.created_at).toLocaleDateString()} | Votes: ${count || 0}</span>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-secondary btn-small" onclick="copyLink('${survey.id}')">Copy Link</button>
+                            <button class="btn btn-secondary btn-small" onclick="showEmbed('${survey.id}')">Embed</button>
+                            <a href="results.html?id=${survey.id}" class="btn btn-primary btn-small">Results</a>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                }
+            } catch (err) {
+                loading.innerHTML = `<p class="message message-error">Error loading surveys: ${err.message}</p>`;
+            }
+        }
+
+        function copyLink(surveyId) {
+            const voteLink = `${window.location.origin}${window.location.pathname.replace('surveys.html', '')}vote.html?id=${surveyId}`;
+            navigator.clipboard.writeText(voteLink).then(() => {
+                alert('Vote link copied to clipboard!');
+            }).catch(() => {
+                alert('Failed to copy. URL: ' + voteLink);
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showEmbed(surveyId) {
+            const baseUrl = window.location.origin + window.location.pathname.replace('surveys.html', '');
+            const embedCode = `<iframe src="${baseUrl}vote.html?id=${surveyId}" width="100%" height="800" frameborder="0" style="border: 1px solid #ddd; border-radius: 8px;"></iframe>`;
+
+            document.getElementById('embed-code').value = embedCode;
+            document.getElementById('embed-modal').style.display = 'flex';
+        }
+
+        function closeEmbedModal() {
+            document.getElementById('embed-modal').style.display = 'none';
+        }
+
+        function copyEmbedCode() {
+            const embedCode = document.getElementById('embed-code');
+            embedCode.select();
+            navigator.clipboard.writeText(embedCode.value).then(() => {
+                alert('Embed code copied to clipboard!');
+                closeEmbedModal();
+            }).catch(() => {
+                alert('Failed to copy. Please copy manually.');
+            });
+        }
+    </script>
+</body>
+</html>

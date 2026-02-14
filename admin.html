@@ -38,6 +38,24 @@
     <main id="admin-content" class="container" style="display: none;">
         <div id="message-container"></div>
 
+        <!-- Admin Navigation -->
+        <div class="card" style="text-align: center;">
+            <a href="admin.html" class="btn btn-primary" style="margin-right: 10px;">Create Surveys</a>
+            <a href="surveys.html" class="btn btn-secondary">View Surveys</a>
+        </div>
+
+        <!-- Survey Created Success -->
+        <div id="survey-created-box" class="card" style="display: none;">
+            <h3 style="color: #28a745; margin-bottom: 15px;">Survey Created Successfully!</h3>
+            <div style="margin-bottom: 10px;">
+                <strong>Survey link:</strong>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="survey-link-input" readonly style="flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 5px; background: #f8f9fa;">
+                <button id="copy-link-btn" class="btn btn-primary">Copy</button>
+            </div>
+        </div>
+
         <!-- Create Survey Form -->
         <div class="card">
             <h2>Create New Survey</h2>
@@ -97,19 +115,6 @@
 
                 <button type="submit" class="btn btn-primary" id="create-btn">Create Survey</button>
             </form>
-        </div>
-
-        <!-- Existing Surveys -->
-        <div class="card">
-            <h2>Existing Surveys</h2>
-            <div id="surveys-loading" class="loading">
-                <div class="spinner"></div>
-                <p>Loading surveys...</p>
-            </div>
-            <ul id="surveys-list" class="survey-list" style="display: none;"></ul>
-            <p id="no-surveys" style="display: none; text-align: center; color: #888;">
-                No surveys created yet.
-            </p>
         </div>
     </main>
 
