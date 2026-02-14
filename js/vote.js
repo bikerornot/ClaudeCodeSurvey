@@ -8,6 +8,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Get survey ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     surveyId = urlParams.get('id');
+    const isEmbed = urlParams.get('embed') === 'true';
+
+    // Hide header if embedded
+    if (isEmbed) {
+        document.getElementById('vote-header').style.display = 'none';
+        document.body.style.background = 'white';
+    }
 
     if (!surveyId) {
         showError('No survey ID provided. Please use a valid survey link.');

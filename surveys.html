@@ -178,7 +178,7 @@
 
         function showEmbed(surveyId) {
             const baseUrl = window.location.origin + window.location.pathname.replace('surveys.html', '');
-            const embedCode = `<iframe src="${baseUrl}vote.html?id=${surveyId}" width="100%" height="800" frameborder="0" style="border: 1px solid #ddd; border-radius: 8px;"></iframe>`;
+            const embedCode = `<iframe src="${baseUrl}vote.html?id=${surveyId}&embed=true" width="100%" height="700" frameborder="0" style="border: 1px solid #ddd; border-radius: 8px;"></iframe>`;
 
             document.getElementById('embed-code').value = embedCode;
             document.getElementById('embed-modal').style.display = 'flex';
