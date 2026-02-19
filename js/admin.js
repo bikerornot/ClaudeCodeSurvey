@@ -2,35 +2,59 @@
 
 // Store accumulated images with titles
 let uploadedImages = []; // Array of { file, title }
+let adminInitialized = false;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const passwordModal = document.getElementById('password-modal');
-    const passwordForm = document.getElementById('password-form');
+    const passwordForm  = document.getElementById('password-form');
+    const emailInput    = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const passwordError = document.getElementById('password-error');
-    const adminContent = document.getElementById('admin-content');
+    const loginBtn      = document.getElementById('login-btn');
+    const adminContent  = document.getElementById('admin-content');
+    const logoutBtn     = document.getElementById('logout-btn');
 
-    // Check if already authenticated
-    if (sessionStorage.getItem('adminAuthenticated') === 'true') {
-        passwordModal.style.display = 'none';
-        adminContent.style.display = 'block';
-        initAdmin();
-    }
+    // Pre-hide modal immediately if session exists (prevents flicker)
+    const session = await getAdminSession();
+    if (session) passwordModal.style.display = 'none';
 
-    // Password form submission
-    passwordForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (passwordInput.value === ADMIN_PASSWORD) {
-            sessionStorage.setItem('adminAuthenticated', 'true');
+    db.auth.onAuthStateChange((event, session) => {
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && !adminInitialized) {
+            adminInitialized = true;
             passwordModal.style.display = 'none';
             adminContent.style.display = 'block';
+            logoutBtn.style.display = 'inline-flex';
             initAdmin();
-        } else {
+        }
+        if (event === 'SIGNED_OUT') {
+            adminInitialized = false;
+            passwordModal.style.display = 'flex';
+            adminContent.style.display = 'none';
+            logoutBtn.style.display = 'none';
+        }
+    });
+
+    passwordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        passwordError.style.display = 'none';
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Signing in...';
+        try {
+            await adminSignIn(emailInput.value.trim(), passwordInput.value);
+        } catch (err) {
             passwordError.style.display = 'block';
             passwordInput.value = '';
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Login';
         }
     });
 });
+
+async function handleLogout() {
+    try { await adminSignOut(); }
+    catch (err) { alert('Logout failed: ' + err.message); }
+}
 
 function initAdmin() {
     setupCreateForm();
