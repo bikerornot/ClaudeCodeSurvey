@@ -4,42 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Results - Survey Voting App</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/tailwind.css">
 </head>
-<body>
-    <header>
-        <div class="container">
-            <h1>Survey Results</h1>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="admin.html">Admin</a>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-white tracking-tight">Survey Results</h1>
+            <nav class="flex gap-1">
+                <a href="index.html" class="text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Home</a>
+                <a href="admin.html" class="text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Admin</a>
             </nav>
         </div>
     </header>
 
-    <main class="container">
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
+    <main class="max-w-5xl mx-auto px-6 py-10">
+
+        <!-- Loading -->
+        <div id="loading" class="flex flex-col items-center py-16 text-gray-400">
+            <div class="w-10 h-10 border-4 border-gray-200 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
             <p>Loading results...</p>
         </div>
 
-        <div id="error-container" style="display: none;"></div>
+        <!-- Error -->
+        <div id="error-container" style="display:none;"></div>
 
-        <div id="results-container" style="display: none;">
-            <div class="card">
-                <h2 id="survey-title"></h2>
-                <p id="survey-description" style="margin-bottom: 15px; color: #555;"></p>
-                <h3 id="survey-question" style="margin-bottom: 15px; color: #333;"></h3>
-                <div class="total-votes">
-                    Total Votes: <span id="total-votes">0</span>
+        <!-- Results -->
+        <div id="results-container" style="display:none;">
+
+            <!-- Survey info card -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h2 id="survey-title" class="text-2xl font-bold text-gray-800 mb-1"></h2>
+                        <p id="survey-description" class="text-gray-500 mb-1"></p>
+                        <p id="survey-question" class="text-gray-700 font-medium"></p>
+                    </div>
+                    <div class="text-center bg-indigo-50 rounded-xl px-5 py-3 shrink-0">
+                        <div id="total-votes" class="text-3xl font-bold text-indigo-600">0</div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide mt-0.5">Total Votes</div>
+                    </div>
                 </div>
-                <button id="refresh-btn" class="btn btn-secondary btn-small">Refresh Results</button>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <button id="refresh-btn" class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                        Refresh Results
+                    </button>
+                </div>
             </div>
 
-            <div class="card">
-                <h2>Vote Distribution</h2>
-                <div id="results-list"></div>
+            <!-- Vote distribution card -->
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-6">Vote Distribution</h3>
+                <div id="results-list" class="space-y-6"></div>
             </div>
+
         </div>
     </main>
 

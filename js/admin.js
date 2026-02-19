@@ -103,18 +103,16 @@ function initializeCBChoices() {
 function addMCChoice() {
     const container = document.getElementById('mc-choices-container');
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
+    wrapper.className = 'flex gap-2 items-center';
 
     const input = document.createElement('input');
     input.type = 'text';
-    input.className = 'mc-choice-input';
-    input.style.cssText = 'flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 5px;';
+    input.className = 'mc-choice-input flex-1 px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400 transition-colors';
 
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = '×';
-    removeBtn.className = 'btn btn-secondary btn-small';
-    removeBtn.style.cssText = 'min-width: 40px;';
+    removeBtn.className = 'w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-red-100 hover:text-red-600 text-gray-400 rounded-lg transition-colors text-lg font-medium shrink-0';
     removeBtn.onclick = () => {
         if (document.querySelectorAll('.mc-choice-input').length > 2) {
             wrapper.remove();
@@ -140,18 +138,16 @@ function renumberMCChoices() {
 function addCBChoice() {
     const container = document.getElementById('cb-choices-container');
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
+    wrapper.className = 'flex gap-2 items-center';
 
     const input = document.createElement('input');
     input.type = 'text';
-    input.className = 'cb-choice-input';
-    input.style.cssText = 'flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 5px;';
+    input.className = 'cb-choice-input flex-1 px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400 transition-colors';
 
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = '×';
-    removeBtn.className = 'btn btn-secondary btn-small';
-    removeBtn.style.cssText = 'min-width: 40px;';
+    removeBtn.className = 'w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-red-100 hover:text-red-600 text-gray-400 rounded-lg transition-colors text-lg font-medium shrink-0';
     removeBtn.onclick = () => {
         if (document.querySelectorAll('.cb-choice-input').length > 2) {
             wrapper.remove();
@@ -192,24 +188,25 @@ function setupImagePreview() {
         preview.innerHTML = '';
         uploadedImages.forEach((item, index) => {
             const wrapper = document.createElement('div');
-            wrapper.style.cssText = 'position: relative; display: inline-block; vertical-align: top; margin: 5px; text-align: center;';
+            wrapper.className = 'relative inline-block align-top text-center';
 
             const img = document.createElement('img');
             img.src = URL.createObjectURL(item.file);
+            img.className = 'w-32 h-32 object-cover rounded-xl border-2 border-gray-200';
             img.onload = () => URL.revokeObjectURL(img.src);
 
             const titleInput = document.createElement('input');
             titleInput.type = 'text';
             titleInput.placeholder = 'Image title';
             titleInput.value = item.title;
-            titleInput.style.cssText = 'width: 100%; max-width: 150px; margin-top: 5px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85rem;';
+            titleInput.className = 'block w-32 mt-1.5 px-2 py-1 border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:border-indigo-400';
             titleInput.oninput = (e) => {
                 uploadedImages[index].title = e.target.value;
             };
 
             const removeBtn = document.createElement('button');
             removeBtn.textContent = '×';
-            removeBtn.style.cssText = 'position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 16px; line-height: 1;';
+            removeBtn.className = 'absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer text-sm font-bold border-2 border-white';
             removeBtn.onclick = (e) => {
                 e.preventDefault();
                 uploadedImages.splice(index, 1);
@@ -490,8 +487,13 @@ function copyLink(surveyId) {
 
 function showMessage(text, type) {
     const container = document.getElementById('message-container');
+    const classes = {
+        success: 'bg-green-50 border border-green-200 text-green-700',
+        error: 'bg-red-50 border border-red-200 text-red-700',
+        info: 'bg-blue-50 border border-blue-200 text-blue-700'
+    };
     const message = document.createElement('div');
-    message.className = `message message-${type}`;
+    message.className = `rounded-xl px-4 py-3 text-sm font-medium ${classes[type] || classes.info}`;
     message.textContent = text;
     container.innerHTML = '';
     container.appendChild(message);

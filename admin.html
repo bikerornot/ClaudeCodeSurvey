@@ -4,116 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Survey Voting App</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/tailwind.css">
 </head>
-<body>
-    <header>
-        <div class="container">
-            <h1>Admin Dashboard</h1>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="admin.html">Admin</a>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-white tracking-tight">Admin Dashboard</h1>
+            <nav class="flex gap-1">
+                <a href="index.html" class="text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Home</a>
+                <a href="admin.html" class="text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Admin</a>
             </nav>
         </div>
     </header>
 
     <!-- Password Modal -->
-    <div id="password-modal" class="modal-overlay">
-        <div class="modal">
-            <h2>Admin Access</h2>
+    <div id="password-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
+            <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 text-center mb-6">Admin Access</h2>
             <form id="password-form">
-                <div class="form-group">
-                    <label for="password">Enter Password</label>
-                    <input type="password" id="password" required>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter admin password" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Login</button>
-                <p id="password-error" class="message message-error" style="display: none; margin-top: 15px;">
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold py-3 rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                    Login
+                </button>
+                <p id="password-error" class="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-center" style="display:none;">
                     Incorrect password. Please try again.
                 </p>
             </form>
         </div>
     </div>
 
-    <!-- Admin Content (hidden until authenticated) -->
-    <main id="admin-content" class="container" style="display: none;">
-        <div id="message-container"></div>
+    <!-- Admin Content -->
+    <main id="admin-content" class="max-w-3xl mx-auto px-6 py-10" style="display:none;">
 
-        <!-- Admin Navigation -->
-        <div class="card" style="text-align: center;">
-            <a href="admin.html" class="btn btn-primary" style="margin-right: 10px;">Create Surveys</a>
-            <a href="surveys.html" class="btn btn-secondary">View Surveys</a>
+        <!-- Flash messages -->
+        <div id="message-container" class="mb-4"></div>
+
+        <!-- Navigation -->
+        <div class="flex gap-3 mb-6">
+            <a href="admin.html" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold px-5 py-2.5 rounded-lg text-sm hover:shadow-md transition-all">
+                Create Survey
+            </a>
+            <a href="surveys.html" class="bg-white text-gray-700 font-semibold px-5 py-2.5 rounded-lg text-sm hover:bg-gray-50 border border-gray-200 transition-colors">
+                View Surveys
+            </a>
         </div>
 
-        <!-- Survey Created Success -->
-        <div id="survey-created-box" class="card" style="display: none;">
-            <h3 style="color: #28a745; margin-bottom: 15px;">Survey Created Successfully!</h3>
-            <div style="margin-bottom: 10px;">
-                <strong>Survey link:</strong>
+        <!-- Survey created success -->
+        <div id="survey-created-box" class="bg-green-50 border border-green-200 rounded-2xl p-5 mb-6" style="display:none;">
+            <div class="flex items-center gap-2 mb-3">
+                <svg class="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <h3 class="font-bold text-green-700">Survey Created Successfully!</h3>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <input type="text" id="survey-link-input" readonly style="flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 5px; background: #f8f9fa;">
-                <button id="copy-link-btn" class="btn btn-primary">Copy</button>
+            <p class="text-sm text-gray-600 mb-2">Share this vote link:</p>
+            <div class="flex gap-2">
+                <input type="text" id="survey-link-input" readonly class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg bg-white text-sm text-gray-700">
+                <button id="copy-link-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm shrink-0">
+                    Copy
+                </button>
             </div>
         </div>
 
         <!-- Create Survey Form -->
-        <div class="card">
-            <h2>Create New Survey</h2>
-            <form id="create-survey-form">
-                <div class="form-group">
-                    <label for="survey-type">Survey Type</label>
-                    <select id="survey-type" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Create New Survey</h2>
+
+            <form id="create-survey-form" class="space-y-5">
+
+                <!-- Survey Type -->
+                <div>
+                    <label for="survey-type" class="form-label">Survey Type</label>
+                    <select id="survey-type" class="form-input">
                         <option value="image">Image Survey</option>
                         <option value="multiple_choice">Multiple Choice (Select One)</option>
                         <option value="checkbox">Checkboxes (Select Multiple)</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="survey-title">Survey Title</label>
-                    <input type="text" id="survey-title" placeholder="Enter survey title" required>
+
+                <!-- Title -->
+                <div>
+                    <label for="survey-title" class="form-label">Survey Title</label>
+                    <input type="text" id="survey-title" class="form-input" placeholder="Enter survey title" required>
                 </div>
-                <div class="form-group">
-                    <label for="survey-description">Description</label>
-                    <textarea id="survey-description" placeholder="Tell voters what they're choosing between..." rows="3" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem; font-family: inherit; resize: vertical;"></textarea>
+
+                <!-- Description -->
+                <div>
+                    <label for="survey-description" class="form-label">Description</label>
+                    <textarea id="survey-description" class="form-input resize-none" rows="3" placeholder="Tell voters what they're choosing between..."></textarea>
                 </div>
 
                 <!-- Image Survey Fields -->
                 <div id="image-fields">
-                    <div class="form-group">
-                        <label>Add Images (minimum 2)</label>
-                        <input type="file" id="image-input" accept="image/*">
-                        <div id="upload-preview" class="upload-preview"></div>
-                        <p id="image-count" style="margin-top: 10px; color: #666;">0 images added</p>
-                    </div>
+                    <label class="form-label">Images <span class="font-normal text-gray-400">(minimum 2)</span></label>
+                    <label class="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-5 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-colors">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span class="text-sm text-gray-500">Click to add an image</span>
+                        <input type="file" id="image-input" accept="image/*" class="hidden">
+                    </label>
+                    <div id="upload-preview" class="flex flex-wrap gap-3 mt-3"></div>
+                    <p id="image-count" class="mt-2 text-sm text-gray-400">0 images added</p>
                 </div>
 
                 <!-- Multiple Choice Fields -->
-                <div id="multiple-choice-fields" style="display: none;">
-                    <div class="form-group">
-                        <label for="mc-question">Question</label>
-                        <input type="text" id="mc-question" placeholder="Enter your question">
+                <div id="multiple-choice-fields" style="display:none;" class="space-y-4">
+                    <div>
+                        <label for="mc-question" class="form-label">Question</label>
+                        <input type="text" id="mc-question" class="form-input" placeholder="Enter your question">
                     </div>
-                    <div class="form-group">
-                        <label>Answer Choices</label>
-                        <div id="mc-choices-container"></div>
-                        <button type="button" class="btn btn-secondary btn-small" onclick="addMCChoice()" style="margin-top: 10px;">+ Add Choice</button>
+                    <div>
+                        <label class="form-label">Answer Choices</label>
+                        <div id="mc-choices-container" class="space-y-2"></div>
+                        <button type="button" onclick="addMCChoice()" class="mt-3 text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
+                            + Add Choice
+                        </button>
                     </div>
                 </div>
 
                 <!-- Checkbox Fields -->
-                <div id="checkbox-fields" style="display: none;">
-                    <div class="form-group">
-                        <label for="cb-question">Question</label>
-                        <input type="text" id="cb-question" placeholder="Enter your question">
+                <div id="checkbox-fields" style="display:none;" class="space-y-4">
+                    <div>
+                        <label for="cb-question" class="form-label">Question</label>
+                        <input type="text" id="cb-question" class="form-input" placeholder="Enter your question">
                     </div>
-                    <div class="form-group">
-                        <label>Options (Select all that apply)</label>
-                        <div id="cb-choices-container"></div>
-                        <button type="button" class="btn btn-secondary btn-small" onclick="addCBChoice()" style="margin-top: 10px;">+ Add Option</button>
+                    <div>
+                        <label class="form-label">Options <span class="font-normal text-gray-400">(select all that apply)</span></label>
+                        <div id="cb-choices-container" class="space-y-2"></div>
+                        <button type="button" onclick="addCBChoice()" class="mt-3 text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
+                            + Add Option
+                        </button>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" id="create-btn">Create Survey</button>
+                <button type="submit" id="create-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold py-3 rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                    Create Survey
+                </button>
+
             </form>
         </div>
     </main>

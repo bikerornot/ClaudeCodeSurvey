@@ -92,41 +92,45 @@ async function loadResults() {
             const count = voteCounts[image.id] || 0;
             const percentage = totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : 0;
             const imageLabel = image.title || `Option ${index + 1}`;
+            const isWinner = index === 0 && count > 0;
 
             const resultItem = document.createElement('div');
-            resultItem.className = 'result-item';
 
             if (survey.type === 'multiple_choice' || survey.type === 'checkbox') {
-                // Multiple choice or checkbox result (no image)
+                // Text-based result (no image)
                 resultItem.innerHTML = `
-                    <div style="padding: 15px;">
-                        <div style="font-weight: 600; margin-bottom: 10px; font-size: 1.1rem;">${escapeHtml(imageLabel)}</div>
-                        <div class="result-bar-container">
-                            <div class="result-bar" style="width: ${Math.max(percentage, 0)}%;">
-                                ${percentage}%
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                ${isWinner ? '<span class="text-yellow-500 text-lg">🏆</span>' : ''}
+                                <span class="font-semibold text-gray-800">${escapeHtml(imageLabel)}</span>
                             </div>
+                            <span class="text-sm text-gray-500">${count} vote${count !== 1 ? 's' : ''}</span>
                         </div>
-                        <div class="result-stats">
-                            <span>${count} vote${count !== 1 ? 's' : ''}</span>
-                            <span>${percentage}%</span>
+                        <div class="w-full bg-gray-100 rounded-full h-5 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500" style="width: ${Math.max(percentage, 0)}%; min-width: ${percentage > 0 ? '2rem' : '0'}">
+                                <span class="text-white text-xs font-semibold">${percentage}%</span>
+                            </div>
                         </div>
                     </div>
                 `;
             } else {
                 // Image survey result
                 resultItem.innerHTML = `
-                    <div style="display: flex; align-items: flex-start; gap: 20px;">
-                        <img src="${image.image_url}" alt="${escapeHtml(imageLabel)}">
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; margin-bottom: 5px;">${escapeHtml(imageLabel)}</div>
-                            <div class="result-bar-container">
-                                <div class="result-bar" style="width: ${Math.max(percentage, 0)}%;">
-                                    ${percentage}%
+                    <div class="flex items-start gap-4">
+                        <img src="${image.image_url}" alt="${escapeHtml(imageLabel)}" class="w-24 h-24 object-cover rounded-xl shrink-0">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    ${isWinner ? '<span class="text-yellow-500 text-lg">🏆</span>' : ''}
+                                    <span class="font-semibold text-gray-800">${escapeHtml(imageLabel)}</span>
                                 </div>
+                                <span class="text-sm text-gray-500">${count} vote${count !== 1 ? 's' : ''}</span>
                             </div>
-                            <div class="result-stats">
-                                <span>${count} vote${count !== 1 ? 's' : ''}</span>
-                                <span>${percentage}%</span>
+                            <div class="w-full bg-gray-100 rounded-full h-5 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500" style="width: ${Math.max(percentage, 0)}%; min-width: ${percentage > 0 ? '2rem' : '0'}">
+                                    <span class="text-white text-xs font-semibold">${percentage}%</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -155,7 +159,7 @@ function showError(message) {
     document.getElementById('loading').style.display = 'none';
     const errorContainer = document.getElementById('error-container');
     errorContainer.style.display = 'block';
-    errorContainer.innerHTML = `<div class="card message message-error">${message}</div>`;
+    errorContainer.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center">${message}</div>`;
 }
 
 function escapeHtml(text) {

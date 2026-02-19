@@ -4,30 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey List - Survey Voting App</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/tailwind.css">
 </head>
-<body>
-    <header>
-        <div class="container">
-            <h1>Survey List</h1>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="admin.html">Admin</a>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-white tracking-tight">Survey List</h1>
+            <nav class="flex gap-1">
+                <a href="index.html" class="text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Home</a>
+                <a href="admin.html" class="text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Admin</a>
             </nav>
         </div>
     </header>
 
     <!-- Password Modal -->
-    <div id="password-modal" class="modal-overlay">
-        <div class="modal">
-            <h2>Admin Access</h2>
+    <div id="password-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
+            <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 text-center mb-6">Admin Access</h2>
             <form id="password-form">
-                <div class="form-group">
-                    <label for="password">Enter Password</label>
-                    <input type="password" id="password" required>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter admin password" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Login</button>
-                <p id="password-error" class="message message-error" style="display: none; margin-top: 15px;">
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold py-3 rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                    Login
+                </button>
+                <p id="password-error" class="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-center" style="display:none;">
                     Incorrect password. Please try again.
                 </p>
             </form>
@@ -35,37 +44,56 @@
     </div>
 
     <!-- Embed Code Modal -->
-    <div id="embed-modal" class="modal-overlay" style="display: none;">
-        <div class="modal">
-            <h2>Embed Code</h2>
-            <p style="margin-bottom: 15px;">Copy this code and paste it into your website or blog:</p>
-            <textarea id="embed-code" readonly rows="4" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-family: monospace; font-size: 0.9rem; margin-bottom: 15px;"></textarea>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button class="btn btn-primary" onclick="copyEmbedCode()">Copy Code</button>
-                <button class="btn btn-secondary" onclick="closeEmbedModal()">Close</button>
+    <div id="embed-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50" style="display:none;">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg mx-4">
+            <h2 class="text-xl font-bold text-gray-800 mb-1">Embed Code</h2>
+            <p class="text-sm text-gray-500 mb-4">Copy and paste this into your website or blog:</p>
+            <textarea id="embed-code" readonly rows="4" class="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl font-mono text-sm text-gray-700 bg-gray-50 focus:outline-none resize-none mb-4"></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeEmbedModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold px-4 py-2 rounded-lg transition-colors text-sm">
+                    Close
+                </button>
+                <button onclick="copyEmbedCode()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm">
+                    Copy Code
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Survey List Content (hidden until authenticated) -->
-    <main id="surveys-content" class="container" style="display: none;">
+    <!-- Surveys Content -->
+    <main id="surveys-content" class="max-w-5xl mx-auto px-6 py-10" style="display:none;">
+
         <!-- Admin Navigation -->
-        <div class="card" style="text-align: center;">
-            <a href="admin.html" class="btn btn-secondary" style="margin-right: 10px;">Create Surveys</a>
-            <a href="surveys.html" class="btn btn-primary">View Surveys</a>
+        <div class="flex gap-3 mb-6">
+            <a href="admin.html" class="bg-white text-gray-700 font-semibold px-5 py-2.5 rounded-lg text-sm hover:bg-gray-50 border border-gray-200 transition-colors">
+                Create Survey
+            </a>
+            <a href="surveys.html" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold px-5 py-2.5 rounded-lg text-sm hover:shadow-md transition-all">
+                View Surveys
+            </a>
         </div>
 
-        <div class="card">
-            <h2>All Surveys</h2>
-            <div id="surveys-loading" class="loading">
-                <div class="spinner"></div>
+        <!-- Survey list card -->
+        <div class="bg-white rounded-2xl shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="text-lg font-bold text-gray-800">All Surveys</h2>
+            </div>
+
+            <!-- Loading -->
+            <div id="surveys-loading" class="flex flex-col items-center py-16 text-gray-400">
+                <div class="w-10 h-10 border-4 border-gray-200 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
                 <p>Loading surveys...</p>
             </div>
-            <ul id="surveys-list" class="survey-list" style="display: none;"></ul>
-            <p id="no-surveys" style="display: none; text-align: center; color: #888;">
+
+            <!-- List -->
+            <ul id="surveys-list" class="divide-y divide-gray-100" style="display:none;"></ul>
+
+            <!-- Empty state -->
+            <p id="no-surveys" class="text-center text-gray-400 py-12" style="display:none;">
                 No surveys created yet.
             </p>
         </div>
+
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -78,14 +106,12 @@
             const passwordError = document.getElementById('password-error');
             const surveysContent = document.getElementById('surveys-content');
 
-            // Check if already authenticated
             if (sessionStorage.getItem('adminAuthenticated') === 'true') {
                 passwordModal.style.display = 'none';
                 surveysContent.style.display = 'block';
                 loadSurveys();
             }
 
-            // Password form submission
             passwordForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 if (passwordInput.value === ADMIN_PASSWORD) {
@@ -105,7 +131,7 @@
             const list = document.getElementById('surveys-list');
             const noSurveys = document.getElementById('no-surveys');
 
-            loading.style.display = 'block';
+            loading.style.display = 'flex';
             list.style.display = 'none';
             noSurveys.style.display = 'none';
 
@@ -128,36 +154,54 @@
                 list.style.display = 'block';
 
                 for (const survey of surveys) {
-                    // Get vote count for this survey
                     const { count } = await db
                         .from('votes')
                         .select('*', { count: 'exact', head: true })
                         .eq('survey_id', survey.id);
 
                     const li = document.createElement('li');
-                    li.className = 'survey-item';
+                    li.className = 'flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors gap-4';
 
-                    let surveyTypeLabel = 'Image';
-                    if (survey.type === 'multiple_choice') surveyTypeLabel = 'Multiple Choice';
-                    if (survey.type === 'checkbox') surveyTypeLabel = 'Checkbox';
+                    const typeBadgeClass = {
+                        image: 'bg-purple-100 text-purple-700',
+                        multiple_choice: 'bg-blue-100 text-blue-700',
+                        checkbox: 'bg-green-100 text-green-700'
+                    }[survey.type] || 'bg-gray-100 text-gray-600';
 
-                    const voteLink = `${window.location.origin}${window.location.pathname.replace('surveys.html', '')}vote.html?id=${survey.id}`;
+                    const typeLabel = {
+                        image: 'Image',
+                        multiple_choice: 'Multiple Choice',
+                        checkbox: 'Checkbox'
+                    }[survey.type] || survey.type;
 
                     li.innerHTML = `
-                        <div>
-                            <h3>${escapeHtml(survey.title)} <span style="font-size: 0.8rem; color: #888; font-weight: normal;">(${surveyTypeLabel})</span></h3>
-                            <span class="date">Created: ${new Date(survey.created_at).toLocaleDateString()} | Votes: ${count || 0}</span>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h3 class="font-semibold text-gray-800 truncate">${escapeHtml(survey.title)}</h3>
+                                <span class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${typeBadgeClass}">${typeLabel}</span>
+                            </div>
+                            <p class="text-sm text-gray-400">
+                                Created ${new Date(survey.created_at).toLocaleDateString()}
+                                <span class="mx-1.5">·</span>
+                                <span class="font-medium text-indigo-500">${count || 0} vote${count !== 1 ? 's' : ''}</span>
+                            </p>
                         </div>
-                        <div class="actions">
-                            <button class="btn btn-secondary btn-small" onclick="copyLink('${survey.id}')">Copy Link</button>
-                            <button class="btn btn-secondary btn-small" onclick="showEmbed('${survey.id}')">Embed</button>
-                            <a href="results.html?id=${survey.id}" class="btn btn-primary btn-small">Results</a>
+                        <div class="flex gap-2 shrink-0">
+                            <button onclick="copyLink('${survey.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors">
+                                Copy Link
+                            </button>
+                            <button onclick="showEmbed('${survey.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors">
+                                Embed
+                            </button>
+                            <a href="results.html?id=${survey.id}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors">
+                                Results
+                            </a>
                         </div>
                     `;
                     list.appendChild(li);
                 }
             } catch (err) {
-                loading.innerHTML = `<p class="message message-error">Error loading surveys: ${err.message}</p>`;
+                loading.innerHTML = `<p class="text-center text-red-500 py-8 w-full">Error loading surveys: ${err.message}</p>`;
             }
         }
 
@@ -170,16 +214,9 @@
             });
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
         function showEmbed(surveyId) {
             const baseUrl = window.location.origin + window.location.pathname.replace('surveys.html', '');
             const embedCode = `<iframe src="${baseUrl}vote.html?id=${surveyId}&embed=true" width="100%" height="700" frameborder="0" style="border: 1px solid #ddd; border-radius: 8px;"></iframe>`;
-
             document.getElementById('embed-code').value = embedCode;
             document.getElementById('embed-modal').style.display = 'flex';
         }
@@ -197,6 +234,12 @@
             }).catch(() => {
                 alert('Failed to copy. Please copy manually.');
             });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>

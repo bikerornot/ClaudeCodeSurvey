@@ -4,54 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vote - Survey Voting App</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/tailwind.css">
 </head>
-<body>
-    <header id="vote-header">
-        <div class="container">
-            <h1>Cast Your Vote</h1>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="admin.html">Admin</a>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Header -->
+    <header id="vote-header" class="bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-white tracking-tight">Cast Your Vote</h1>
+            <nav class="flex gap-1">
+                <a href="index.html" class="text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Home</a>
+                <a href="admin.html" class="text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Admin</a>
             </nav>
         </div>
     </header>
 
-    <main class="container">
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
+    <main class="max-w-5xl mx-auto px-6 py-10">
+
+        <!-- Loading -->
+        <div id="loading" class="flex flex-col items-center py-16 text-gray-400">
+            <div class="w-10 h-10 border-4 border-gray-200 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
             <p>Loading survey...</p>
         </div>
 
-        <div id="error-container" style="display: none;"></div>
+        <!-- Error -->
+        <div id="error-container" style="display:none;"></div>
 
-        <div id="survey-container" style="display: none;">
-            <div class="card">
-                <h2 id="survey-question" style="margin-bottom: 15px; color: #333;"></h2>
-                <p id="survey-instruction">Click on an image to vote for it</p>
+        <!-- Survey content -->
+        <div id="survey-container" style="display:none;">
+
+            <!-- Question card -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                <h2 id="survey-question" class="text-xl font-bold text-gray-800 mb-1"></h2>
+                <p id="survey-instruction" class="text-gray-500"></p>
             </div>
 
-            <div id="image-grid" class="image-grid"></div>
+            <!-- Image / choice / checkbox grid injected by JS -->
+            <div id="image-grid"></div>
 
-            <div id="vote-actions" class="card" style="display: none; text-align: center;">
-                <p>Selected image:</p>
-                <img id="selected-preview" style="max-width: 200px; border-radius: 10px; margin: 15px 0;">
-                <br>
-                <button id="submit-vote" class="btn btn-success">Submit Vote</button>
-                <button id="cancel-vote" class="btn btn-secondary">Cancel</button>
+            <!-- Vote actions -->
+            <div id="vote-actions" class="bg-white rounded-2xl shadow-sm p-6 mt-6 text-center" style="display:none;">
+                <p id="selection-label" class="text-gray-600 font-medium mb-3"></p>
+                <img id="selected-preview" class="max-w-48 rounded-xl mx-auto mb-4" style="display:none;">
+                <div class="flex justify-center gap-3">
+                    <button id="submit-vote" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors">
+                        Submit Vote
+                    </button>
+                    <button id="cancel-vote" class="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div id="already-voted" class="card already-voted" style="display: none;">
-            <h2>You've Already Voted!</h2>
-            <p>You have already cast your vote for this survey.</p>
-            <a id="view-results-link" href="#" class="btn btn-primary">View Results</a>
+        <!-- Already voted -->
+        <div id="already-voted" class="bg-white rounded-2xl shadow-sm p-12 text-center" style="display:none;">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-green-600 mb-2">You've Already Voted!</h2>
+            <p class="text-gray-500 mb-6">You have already cast your vote for this survey.</p>
+            <a id="view-results-link" href="#" class="inline-block bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold px-6 py-3 rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                View Results
+            </a>
         </div>
 
-        <div id="thank-you" class="card already-voted" style="display: none;">
-            <h2>Thank You for Voting!</h2>
-            <p>Your vote has been recorded.</p>
+        <!-- Thank you -->
+        <div id="thank-you" class="bg-white rounded-2xl shadow-sm p-12 text-center" style="display:none;">
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Thank You for Voting!</h2>
+            <p class="text-gray-500">Your vote has been recorded.</p>
         </div>
+
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

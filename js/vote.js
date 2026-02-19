@@ -83,7 +83,7 @@ async function loadSurvey() {
 
         if (survey.type === 'multiple_choice') {
             // Render as multiple choice buttons
-            grid.className = 'multiple-choice-grid';
+            grid.className = 'flex flex-col gap-3 max-w-xl mx-auto mt-2';
             images.forEach(choice => {
                 const button = document.createElement('button');
                 button.className = 'choice-button';
@@ -94,7 +94,7 @@ async function loadSurvey() {
             });
         } else if (survey.type === 'checkbox') {
             // Render as checkboxes
-            grid.className = 'checkbox-grid';
+            grid.className = 'flex flex-col gap-3 max-w-xl mx-auto mt-2';
             images.forEach(option => {
                 const label = document.createElement('label');
                 label.className = 'checkbox-label';
@@ -114,14 +114,14 @@ async function loadSurvey() {
             });
         } else {
             // Render as image grid
-            grid.className = 'image-grid';
+            grid.className = 'grid grid-cols-2 md:grid-cols-3 gap-4 mt-2';
             images.forEach(image => {
                 const card = document.createElement('div');
                 card.className = 'image-card';
                 card.dataset.imageId = image.id;
                 card.innerHTML = `
                     <img src="${image.image_url}" alt="${image.title || 'Survey option'}">
-                    ${image.title ? `<div class="image-title">${escapeHtml(image.title)}</div>` : ''}
+                    ${image.title ? `<div class="px-3 py-2 text-center text-sm font-medium text-gray-700 bg-gray-50 border-t border-gray-100">${escapeHtml(image.title)}</div>` : ''}
                 `;
                 card.addEventListener('click', () => selectImage(image.id, image.image_url));
                 grid.appendChild(card);
@@ -173,7 +173,7 @@ function selectChoice(choiceId, choiceText) {
     const actions = document.getElementById('vote-actions');
     const preview = document.getElementById('selected-preview');
     preview.style.display = 'none';
-    document.querySelector('#vote-actions p').textContent = `Selected: ${choiceText}`;
+    document.getElementById('selection-label').textContent = `Selected: ${choiceText}`;
     actions.style.display = 'block';
 }
 
@@ -186,7 +186,7 @@ function updateCheckboxSelection() {
     preview.style.display = 'none';
 
     if (selectedImageIds.length > 0) {
-        document.querySelector('#vote-actions p').textContent = `Selected ${selectedImageIds.length} option${selectedImageIds.length !== 1 ? 's' : ''}`;
+        document.getElementById('selection-label').textContent = `Selected ${selectedImageIds.length} option${selectedImageIds.length !== 1 ? 's' : ''}`;
         actions.style.display = 'block';
     } else {
         actions.style.display = 'none';
@@ -263,7 +263,7 @@ function cancelSelection() {
         cb.checked = false;
     });
     document.getElementById('vote-actions').style.display = 'none';
-    document.querySelector('#vote-actions p').textContent = 'Selected image:';
+    document.getElementById('selection-label').textContent = '';
 }
 
 function hasVoted(surveyId) {
@@ -292,7 +292,7 @@ function showError(message) {
     document.getElementById('loading').style.display = 'none';
     const errorContainer = document.getElementById('error-container');
     errorContainer.style.display = 'block';
-    errorContainer.innerHTML = `<div class="card message message-error">${message}</div>`;
+    errorContainer.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center">${message}</div>`;
 }
 
 function escapeHtml(text) {

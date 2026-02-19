@@ -4,43 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey Voting App</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/tailwind.css">
 </head>
-<body>
-    <header>
-        <div class="container">
-            <h1>Survey Voting App</h1>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="admin.html">Admin</a>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-white tracking-tight">Survey App</h1>
+            <nav class="flex gap-1">
+                <a href="index.html" class="text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Home</a>
+                <a href="admin.html" class="text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Admin</a>
             </nav>
         </div>
     </header>
 
-    <main class="container">
-        <div class="hero card">
-            <h1>Welcome to Survey Voting</h1>
-            <p>Create image-based surveys and let people vote for their favorites!</p>
-            <div class="hero-buttons">
-                <a href="admin.html" class="btn btn-primary">Admin Dashboard</a>
-            </div>
+    <main class="max-w-5xl mx-auto px-6 py-10">
+
+        <!-- Hero -->
+        <div class="bg-white rounded-2xl shadow-sm p-12 text-center mb-10">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Welcome to Survey Voting</h2>
+            <p class="text-lg text-gray-500 mb-8">Create surveys and let people vote for their favorites!</p>
+            <a href="admin.html" class="inline-block bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold px-8 py-3 rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                Admin Dashboard
+            </a>
         </div>
 
-        <section class="surveys-section">
-            <h2>Active Surveys</h2>
-            <div id="loading" class="loading">
-                <div class="spinner"></div>
+        <!-- Active Surveys -->
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Active Surveys</h2>
+
+            <!-- Loading spinner -->
+            <div id="loading" class="flex flex-col items-center py-16 text-gray-400">
+                <div class="w-10 h-10 border-4 border-gray-200 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
                 <p>Loading surveys...</p>
             </div>
-            <div id="surveys-container" class="card" style="display: none;">
-                <ul id="surveys-list" class="survey-list">
-                    <!-- Surveys will be loaded here -->
-                </ul>
-                <p id="no-surveys" style="display: none; text-align: center; color: #888;">
+
+            <!-- Surveys list -->
+            <div id="surveys-container" class="bg-white rounded-2xl shadow-sm overflow-hidden" style="display:none;">
+                <ul id="surveys-list" class="divide-y divide-gray-100"></ul>
+                <p id="no-surveys" class="text-center text-gray-400 py-12" style="display:none;">
                     No surveys available yet. Create one in the admin dashboard!
                 </p>
             </div>
         </section>
+
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -70,21 +78,21 @@
 
                 surveys.forEach(survey => {
                     const li = document.createElement('li');
-                    li.className = 'survey-item';
+                    li.className = 'flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors';
                     li.innerHTML = `
                         <div>
-                            <h3>${escapeHtml(survey.title)}</h3>
-                            <span class="date">Created: ${new Date(survey.created_at).toLocaleDateString()}</span>
+                            <h3 class="font-semibold text-gray-800">${escapeHtml(survey.title)}</h3>
+                            <span class="text-sm text-gray-400">Created: ${new Date(survey.created_at).toLocaleDateString()}</span>
                         </div>
-                        <div class="actions">
-                            <a href="vote.html?id=${survey.id}" class="btn btn-primary btn-small">Vote</a>
-                            <a href="results.html?id=${survey.id}" class="btn btn-secondary btn-small">Results</a>
+                        <div class="flex gap-2">
+                            <a href="vote.html?id=${survey.id}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">Vote</a>
+                            <a href="results.html?id=${survey.id}" class="bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">Results</a>
                         </div>
                     `;
                     list.appendChild(li);
                 });
             } catch (err) {
-                loading.innerHTML = `<p class="message message-error">Error loading surveys: ${err.message}</p>`;
+                loading.innerHTML = `<p class="text-center text-red-500 py-8">Error loading surveys: ${err.message}</p>`;
             }
         });
 
