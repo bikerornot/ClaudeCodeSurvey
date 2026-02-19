@@ -31,6 +31,13 @@ async function loadResults() {
         if (surveyError) throw surveyError;
         if (!survey) throw new Error('Survey not found');
 
+        // Owner-only gate
+        const { data: { session } } = await db.auth.getSession();
+        if (!session || session.user.id !== survey.user_id) {
+            showError('You must be logged in as the survey owner to view results.');
+            return;
+        }
+
         // Fetch images
         const { data: images, error: imagesError } = await db
             .from('images')
@@ -159,7 +166,20 @@ function showError(message) {
     document.getElementById('loading').style.display = 'none';
     const errorContainer = document.getElementById('error-container');
     errorContainer.style.display = 'block';
-    errorContainer.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center">${message}</div>`;
+    errorContainer.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-sm p-12 text-center">
+            <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Survey Not Found</h2>
+            <p class="text-gray-500 mb-6">${message}</p>
+            <a href="index.html" class="inline-block bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold px-6 py-2.5 rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                View All Surveys
+            </a>
+        </div>
+    `;
 }
 
 function escapeHtml(text) {

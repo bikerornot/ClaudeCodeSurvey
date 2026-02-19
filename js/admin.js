@@ -3,6 +3,38 @@
 // Store accumulated images with titles
 let uploadedImages = []; // Array of { file, title }
 let adminInitialized = false;
+let currentAuthMode = 'login';
+
+function setAuthMode(mode) {
+    currentAuthMode = mode;
+    document.getElementById('signup-success').style.display = 'none';
+    document.getElementById('password-error').style.display = 'none';
+    const loginBtn = document.getElementById('login-btn');
+    const tabLogin = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
+    if (mode === 'login') {
+        loginBtn.textContent = 'Log In';
+        tabLogin.classList.add('bg-white', 'shadow', 'text-gray-800');
+        tabLogin.classList.remove('text-gray-500');
+        tabSignup.classList.remove('bg-white', 'shadow', 'text-gray-800');
+        tabSignup.classList.add('text-gray-500');
+    } else {
+        loginBtn.textContent = 'Sign Up';
+        tabSignup.classList.add('bg-white', 'shadow', 'text-gray-800');
+        tabSignup.classList.remove('text-gray-500');
+        tabLogin.classList.remove('bg-white', 'shadow', 'text-gray-800');
+        tabLogin.classList.add('text-gray-500');
+    }
+}
+
+async function handleGoogleSignIn() {
+    try { await signInWithGoogle(); }
+    catch (err) {
+        const el = document.getElementById('password-error');
+        el.textContent = err.message;
+        el.style.display = 'block';
+    }
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     const passwordModal = document.getElementById('password-modal');
@@ -36,19 +68,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     passwordForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        passwordError.style.display = 'none';
+        const errorEl = document.getElementById('password-error');
+        const successEl = document.getElementById('signup-success');
+        errorEl.style.display = 'none';
+        successEl.style.display = 'none';
         loginBtn.disabled = true;
-        loginBtn.textContent = 'Signing in...';
+        loginBtn.textContent = currentAuthMode === 'login' ? 'Signing in...' : 'Signing up...';
         try {
-            await adminSignIn(emailInput.value.trim(), passwordInput.value);
+            if (currentAuthMode === 'login') {
+                await adminSignIn(emailInput.value.trim(), passwordInput.value);
+            } else {
+                await signUp(emailInput.value.trim(), passwordInput.value);
+                successEl.style.display = 'block';
+                emailInput.value = '';
+                passwordInput.value = '';
+            }
         } catch (err) {
-            passwordError.style.display = 'block';
+            errorEl.textContent = err.message;
+            errorEl.style.display = 'block';
             passwordInput.value = '';
         } finally {
             loginBtn.disabled = false;
-            loginBtn.textContent = 'Login';
+            loginBtn.textContent = currentAuthMode === 'login' ? 'Log In' : 'Sign Up';
         }
     });
+
+    if (new URLSearchParams(window.location.search).get('signup') === 'true') {
+        setAuthMode('signup');
+    }
 });
 
 async function handleLogout() {
@@ -304,10 +351,12 @@ async function createImageSurvey(title, description) {
         throw new Error('Please add at least 2 images.');
     }
 
+    const { data: { user } } = await db.auth.getUser();
+
     // Create survey
     const { data: survey, error: surveyError } = await db
         .from('surveys')
-        .insert({ title, description, type: 'image' })
+        .insert({ title, description, type: 'image', user_id: user.id })
         .select()
         .single();
 
@@ -366,13 +415,16 @@ async function createMultipleChoiceSurvey(title, description) {
 
     const surveyTitle = title || 'Multiple Choice Survey';
 
+    const { data: { user } } = await db.auth.getUser();
+
     const { data: survey, error: surveyError } = await db
         .from('surveys')
         .insert({
             title: surveyTitle,
             description: description || null,
             question: question,
-            type: 'multiple_choice'
+            type: 'multiple_choice',
+            user_id: user.id
         })
         .select()
         .single();
@@ -411,13 +463,16 @@ async function createCheckboxSurvey(title, description) {
 
     const surveyTitle = title || 'Checkbox Survey';
 
+    const { data: { user } } = await db.auth.getUser();
+
     const { data: survey, error: surveyError } = await db
         .from('surveys')
         .insert({
             title: surveyTitle,
             description: description || null,
             question: question,
-            type: 'checkbox'
+            type: 'checkbox',
+            user_id: user.id
         })
         .select()
         .single();

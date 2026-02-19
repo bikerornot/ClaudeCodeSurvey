@@ -17,3 +17,14 @@ async function getAdminSession() {
     const { data: { session } } = await db.auth.getSession();
     return session;
 }
+async function signUp(email, password) {
+    const { error } = await db.auth.signUp({ email, password });
+    if (error) throw error;
+}
+async function signInWithGoogle() {
+    const { error } = await db.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/admin.html' }
+    });
+    if (error) throw error;
+}
