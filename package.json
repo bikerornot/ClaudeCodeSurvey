@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tailwindcss -i ./css/input.css -o ./css/tailwind.css",
     "watch": "tailwindcss -i ./css/input.css -o ./css/tailwind.css --watch",
-    "start": "serve ."
+    "start": "serve . -l 8080"
   },
   "repository": {
     "type": "git",
